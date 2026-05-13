@@ -1,4 +1,4 @@
-# NDL: representation-coherence-guided denoising for graph collaborative filtering
+# Representation-Coherence-guided Denoising for graph collaborative filtering
 
 PyTorch Implementation for NDL: representation-coherence-guided denoising for graph collaborative filtering
 
