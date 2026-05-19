@@ -41,10 +41,10 @@ python main_ndl.py \
   --epoch 500 \
   --context_hops 2 \
   --dim 32 \
-  --tau_coh 0.3 \
+  --tau_coh 0.1 \
   --tau_loss 5.0 \
   --ema_decay 0.9 \
-  --min_activity 70.0 \
+  --min_activity 50.0 \
   --warmup_epochs 10 \
   --cl_lambda 0.001 \
   --cl_temp 0.2 \
@@ -57,7 +57,7 @@ Set `--cl_lambda 0` to disable the contrastive term.
 
 | Dataset | `tau_coh` | `tau_loss` | `ema_decay` | `min_activity` | `cl_lambda` |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| MovieLens | 0.3 | 5.0 | 0.9 | 70.0 | 0.001 |
+| MovieLens | 0.1 | 5.0 | 0.9 | 50.0 | 0.001 |
 | Yelp | 0.5 | 10.0 | 0.9 | 30.0 | 0.001 |
 | Book | 0.5 | 5.0 | 0.5 | 25.0 | 0.001 |
 
