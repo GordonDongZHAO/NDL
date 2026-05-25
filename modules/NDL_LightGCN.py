@@ -2,7 +2,7 @@
 NDL_LightGCN.py  — Noise-aware Dimension Learning (NDL) + LightGCN backbone
 
 Core mechanism:
-  - Dimension Adaptation (from DAR):
+  - Dimension Adaptation:
       For each positive interaction (u, i), estimate noise level α ∈ [0,1],
       then limit gradient to the first d_ui = floor(d × (1−α)) dimensions.
       High-noise interaction → fewer active dims → weaker gradient update.
@@ -17,7 +17,7 @@ Core mechanism:
 
 Training uses standard hard binary labels (0/1); noise is expressed solely
 through the dimension mask — no soft labels, no gradient reweighting.
-Inference uses standard full-dim inner product (same as LightGCN/DAR).
+Inference uses standard full-dim inner product.
 """
 
 import torch
@@ -26,7 +26,7 @@ import torch.nn.functional as F
 
 
 class GraphConv(nn.Module):
-    """Graph Convolutional Network (same as DAR)"""
+    """Graph Convolutional Network"""
 
     def __init__(self, n_hops, n_users, interact_mat,
                  edge_dropout_rate=0.5, mess_dropout_rate=0.1):
@@ -79,13 +79,13 @@ class NDL_LightGCN(nn.Module):
     """
     NDL — Multi-Signal Noise Estimation + Dimension Adaptation (Re-scaling).
 
-    Training strategy (same mechanism as DAR, but better noise estimation):
+    Training strategy:
       For each positive interaction (u, i) with noise level alpha:
         - d_ui = floor(d * (1 - alpha))
         - Positive loss:  BCE(e_u[:d_ui]^T e_i[:d_ui], 1)  [dimension-truncated]
         - Negative loss:  BCE(e_u^T e_i, 0)                 [full dimensions]
 
-    Noise estimation (OUR INNOVATION, replacing DAR's loss-only estimation):
+    Noise estimation:
       - Coherence signal: representation-space consistency (immune to memorization)
       - Loss signal:      multi-granular (interaction/user/item level)
       - Fusion:           activity-aware confidence weighting

@@ -1,17 +1,9 @@
 """
-main_ndl.py  (v4 — Multi-Signal Noise Estimation + Dimension Adaptation)
+main_ndl.py — NDL: Representation-Coherence-Guided Denoising for Graph Collaborative Filtering
 
-v4 = DAR's dimension adaptation mechanism + our improved noise estimation.
-
-Why this works:
-  - Re-weighting (v2/v3) uniformly dilutes gradient across ALL dimensions
-  - Re-scaling (DAR/v4) gives FULL gradient to first d_ui dims, zero to rest
-  - On sparse data, each interaction is precious; re-scaling preserves more signal
-
-Our innovation over DAR:
-  - Coherence-based detection (immune to noise memorization)
-  - Multi-signal fusion with loss-based signals (robust on sparse data)
-  - Activity-aware confidence weighting
+Training pipeline:
+  - Phase 1 (per epoch): precompute multi-signal noise estimates for all interactions
+  - Phase 2 (per batch): dimension-adaptive training with optional contrastive regularization
 """
 
 import os
@@ -125,9 +117,8 @@ def compute_cl_loss(model, user_indices, item_indices, cl_temp=0.2, cl_drop=0.1)
 def compute_loss_based_noise(all_losses, train_cf,
                              n_users_total, n_items_total, tau_loss):
     """
-    DAR-style multi-granular noise estimation from precomputed losses.
-    Fully vectorized implementation. This removes Python loops over users/items
-    that took about 45s at Book scale.
+    Multi-granular noise estimation from precomputed losses.
+    Fully vectorized implementation.
 
     Returns:
         alpha_inter: [n_interactions] interaction-level noise
@@ -139,7 +130,7 @@ def compute_loss_based_noise(all_losses, train_cf,
     items_t = train_cf[:, 1].long()   # [N]
     n = len(train_cf)
 
-    # ── 1. Interaction-level noise (DAR Eq.18) ─────────────────────────────
+    # ── 1. Interaction-level noise ──────────────────────────────────────────
     # Within each user's interactions, lower-loss entries receive larger softmax
     # probabilities. After scaling by n_u, their reliability approaches 1, so
     # their noise level alpha is lower.
@@ -173,7 +164,7 @@ def compute_loss_based_noise(all_losses, train_cf,
     reliability = torch.clamp(n_u_per_inter * softmax_probs, max=1.0)
     alpha_inter = 1.0 - reliability                                  # [N]
 
-    # ── 2. User-level noise (DAR Eq.19) ────────────────────────────────────
+    # ── 2. User-level noise ─────────────────────────────────────────────────
     # A high average loss for a user indicates that the user's behavior pattern
     # is hard to fit and may contain more unreliable interactions.
     # user avg loss = sum(loss) / count
@@ -191,7 +182,7 @@ def compute_loss_based_noise(all_losses, train_cf,
     n_valid_u = valid_users_mask.sum().item()
     alpha_user[valid_users_mask] = 1.0 - torch.clamp(n_valid_u * sp_u, max=1.0)
 
-    # ── 3. Item-level noise (DAR Eq.20) ────────────────────────────────────
+    # ── 3. Item-level noise ─────────────────────────────────────────────────
     # A high average loss for an item indicates that many of its interactions
     # may be unreliable.
     i_loss_sum = torch.zeros(n_items_total)
@@ -302,7 +293,7 @@ if __name__ == '__main__':
     print(f"[NDL] Warmup: {args.warmup_epochs} epochs, "
           f"tau_coh: {args.tau_coh}, tau_loss: {args.tau_loss}")
     print(f"[NDL] min_activity: {args.min_activity}, ema_decay: {args.ema_decay}")
-    print(f"[NDL] dim: {args.dim} (dimension-adaptive, like DAR)")
+    print(f"[NDL] dim: {args.dim} (dimension-adaptive)")
     if cl_lambda == 0:
         _cl_mode_str = "disabled"
     else:
