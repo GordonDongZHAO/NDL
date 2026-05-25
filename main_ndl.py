@@ -1,5 +1,5 @@
 """
-main_ndl.py — NDL: Representation-Coherence-Guided Denoising for Graph Collaborative Filtering
+main_ndl.py — Proactive Dimension-Adaptive Denoising for Graph Collaborative Filtering via Representation Coherence
 
 Training pipeline:
   - Phase 1 (per epoch): precompute multi-signal noise estimates for all interactions

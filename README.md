@@ -1,6 +1,6 @@
-# Representation-Coherence-guided Denoising for graph collaborative filtering
+# Proactive Dimension-Adaptive Denoising for Graph Collaborative Filtering via Representation Coherence
 
-PyTorch Implementation for NDL: representation-coherence-guided denoising for graph collaborative filtering
+PyTorch Implementation for Proactive Dimension-Adaptive Denoising for Graph Collaborative Filtering via Representation Coherence
 
 --- Based on “DAR: Dimension-Adaptive Recommendation with Multi-Granular Noise Control, SIGIR 2025”, https://github.com/Riwei-HEU/DAR
 
